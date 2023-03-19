@@ -5,17 +5,19 @@ import java.util.ArrayList;
 import java.util.Scanner;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 import java.io.OutputStream;
 
 public class mainFile {
     static File file;
+    static String fileString = "";
     static boolean test = true;
-    static String className;
-    static ArrayList<varClass> list = new ArrayList<>();
-    static ArrayList<String> fieldList = new ArrayList<>();
-    static ArrayList<String> constructorList = new ArrayList<>();
-    static ArrayList<String> methodList = new ArrayList<>();
-    Document document;
+    static varClass className;
+    static ArrayList<varClass> fieldList = new ArrayList<>();
+    static ArrayList<varClass> constructorList = new ArrayList<>();
+    static ArrayList<varClass> methodList = new ArrayList<>();
+    static Document document;
 
     static void tester() throws FileNotFoundException {
         File config = new File("config.txt");
@@ -39,21 +41,14 @@ public class mainFile {
 
     }
 
-    static String extractValue(String valToExtract) throws FileNotFoundException {
+    static void setup2() throws FileNotFoundException {
         Scanner scanner = new Scanner(file);
-        String currLine;
         while (scanner.hasNextLine()) {
-            currLine = scanner.nextLine().trim();
-            if (currLine.length() >= valToExtract.length() + 2
-                    && currLine.subSequence(0, valToExtract.length() + 2)
-                            .equals("<" + valToExtract + ">")) {
-                return currLine.substring(("<" + valToExtract + ">").length(),
-                        currLine.indexOf("</" + valToExtract + ">"));
-            }
+            fileString += scanner.nextLine();
         }
-        return "";
-
+        document = Jsoup.parse(fileString);
     }
+
 
     static void archiveText(String stringVar, String file, boolean append) {
         try {
@@ -73,60 +68,105 @@ public class mainFile {
 
     }
 
-    static boolean convertListToClass() {
-        for (int i = 0; i < fieldList.size(); i++) {
-            if (fieldList.get(i).contains(
-                    "<div class=\"member-signature\"><span class=\"modifiers\">")) {
-                System.out.println(fieldList.get(i));
-            }
+    static void convertToClass() {
+        String desc;
+        try {
+            desc = document
+                    .selectXpath(
+                            "//section[@class='class-description']/div[@class='block']")
+                    .text();
+
+        } catch (Exception e) {
+            desc = "";
         }
-        return false;
+        className = new varClass("class",
+                document.selectXpath(
+                        "//div[@class='type-signature']/span[@class='modifiers']").text(),
+                document.title(), desc);
+
+
+        Elements fieldElements = document.selectXpath(
+                "//section[@class='field-details']/*/*/section[@class='detail']");
+        for (int i = 0; i < fieldElements.size(); i++) {
+            String description;
+            try {
+                description = document.selectXpath(
+                        "//section[@class='field-details']/*/*/*/div[@class='block']")
+                        .get(i).text();
+
+            } catch (Exception e) {
+                description = "";
+            }
+            fieldList.add(new varClass("field", document.selectXpath(
+                    "//section[@class='field-details']/*/*/*/*/span[@class='modifiers']")
+                    .get(i).text(),
+                    document.selectXpath(
+                            "//section[@class='field-details']/*/*/*/*/span[@class='element-name']")
+                            .get(i).text(),
+                    description
+
+            ));
+
+        }
+
+        //constructors
+        Elements constructorElements = document.selectXpath(
+                "//section[@class='constructor-details']/*/*/section[@class='detail']");
+        for (int i = 0; i < constructorElements.size(); i++) {
+            String description;
+            try {
+                description = document.selectXpath(
+                        "//section[@class='constructor-details']/*/*/*/div[@class='block']")
+                        .get(i).text();
+
+            } catch (Exception e) {
+                description = "";
+            }
+            constructorList.add(new varClass("constructor", document.selectXpath(
+                    "//section[@class='constructor-details']/*/*/*/*/span[@class='modifiers']")
+                    .get(i).text(),
+                    document.selectXpath(
+                            "//section[@class='constructor-details']/*/*/*/*/span[@class='element-name']")
+                            .get(i).text(),
+                    description));
+        }
+
+        //methods
+        Elements methodElements = document.selectXpath(
+                "//section[@class='method-details']/*/*/section[@class='detail']");
+        ArrayList<String[]> tempTagList = new ArrayList<>();
+        for (int i = 0; i < methodElements.size(); i++) {
+            String description;
+            try {
+                description = document.selectXpath(
+                        "//section[@class='method-details']/*/*/*/div[@class='block']")
+                        .get(i).text();
+
+            } catch (Exception e) {
+                description = "";
+            }
+            for (Element j : methodElements.get(i).getElementsByClass("notes")) {
+                //tempTagList.add(j.text());
+                for (int k = 0; k < j.parent().getElementsByTag("dd").size(); k++) {
+                    System.out.println(document.selectXpath(
+                            "//section[@class='method-details']/*/*/*/*/span[@class='element-name']")
+                            .get(i).text() + " "
+                            + j.parent().getElementsByTag("dd").get(k).text());
+                }
+            }
+            methodList.add(new varClass("method", document.selectXpath(
+                    "//section[@class='method-details']/*/*/*/*/span[@class='modifiers']")
+                    .get(i).text(),
+                    document.selectXpath(
+                            "//section[@class='method-details']/*/*/*/*/span[@class='element-name']")
+                            .get(i).text(),
+                    description));
+        }
+
+
     }
 
-    static boolean convertFileToList() {
-        String currline;
-
-        try {
-            className = (extractValue("title"));
-            Scanner scanner = new Scanner(file);
-            while (scanner.hasNextLine()) {
-                currline = scanner.nextLine().trim();
-                if (currline.equals("<!-- =========== FIELD SUMMARY =========== -->")) {
-                    while (!currline
-                            .equals("<!-- ========= CONSTRUCTOR DETAIL ======== -->")) {
-                        fieldList.add(currline);
-                        currline = scanner.nextLine().trim();
-                    }
-                }
-                if (currline.equals("<!-- ========= CONSTRUCTOR DETAIL ======== -->")) {
-                    while (!currline
-                            .equals("<!-- ============ METHOD DETAIL ========== -->")) {
-                        constructorList.add(currline);
-                        currline = scanner.nextLine().trim();
-                    }
-                }
-                if (currline.equals("<!-- ============ METHOD DETAIL ========== -->")) {
-                    while (!currline
-                            .equals("<!-- ========= END OF CLASS DATA ========= -->")) {
-                        methodList.add(currline);
-                        currline = scanner.nextLine().trim();
-                    }
-                    break;
-                }
-
-
-
-            }
-
-            return true;
-        } catch (
-
-        Exception e) {
-            e.printStackTrace();
-            return false;
-        }
-
-
+    static void createJavaFile() {
 
     }
 
@@ -139,14 +179,11 @@ public class mainFile {
                 System.out.println("Invalid filename");
                 return;
             }
-            if (!convertFileToList()) {
-                System.out.println("Invalid javadoc");
-                return;
-            }
-            if (!convertListToClass()) {
-                System.out.println("Invalid Elements");
-                return;
-            }
+            setup2();
+            convertToClass();
+            archiveText(methodList.toString(), "test.txt", false);
+            //System.out.println(fieldList.toString());
+
         } catch (Exception e) {
             e.printStackTrace();
             return;
