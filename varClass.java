@@ -1,40 +1,60 @@
 import java.util.ArrayList;
-import java.util.Arrays;
 
+/**
+ * This class keeps track of all the values connected to a class/field/constructor/method
+ */
 public class varClass {
-    //class or field or constructor or method
+    /**
+     * Whether the given instance is an example of class or field or constructor or method
+     */
     public String keyword;
 
-    //visibility 
+    /**
+     * visibility of instance
+     */
     public String modifier;
 
-    //type
+    /**
+     * type of instance
+     */
     public String type;
 
-    //name of variable
+    /**
+     * name of variable
+     */
     public String varName;
 
-    //all the parameters given
+    /**
+     * all the parameters given (only applicable to methods and constructors)
+     */
     public String param;
 
-    //description
+    /**
+     * description written in the javadoc
+     */
     public String description;
 
-    //stores a list of all the available types
+    /**
+     * stores a list of given tag types
+     */
     public ArrayList<String> tagType = new ArrayList<>();
 
-    //stores a list of the description of all avaliable types
+    /**
+     * stores a list of the description of given tags
+     */
     public ArrayList<String> tagDescription = new ArrayList<>();
 
 
     /**
-     * tags: [ [tagType,tagDescription],[tagType,tagDescription] ]
+     * * Assigns the values to the corresponding variables
      * 
-     * @param keyword
-     * @param modifier
-     * @param varName
-     * @param description
-     * @param tags
+     * @param keyword     class/field/constructor/method
+     * @param modifier    visibility (Eg: public static)
+     * @param type        type of variable (Eg: int)
+     * @param varName     name of variable (Eg: numObjects)
+     * @param param       assigned parameters (Eg: (int a, int b))
+     * @param description attached javadoc description
+     * @param tags        attached tags (Eg: '@param)
      */
     varClass(String keyword, String modifier, String type, String varName, String param,
             String description, String[]... tags) {

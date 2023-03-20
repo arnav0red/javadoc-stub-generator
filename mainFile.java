@@ -4,11 +4,16 @@ import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Scanner;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+
+/**
+ * This class defines the steps
+ */
 public class mainFile {
     static File file;
     static String fileString = "";
@@ -19,34 +24,34 @@ public class mainFile {
     static ArrayList<varClass> methodList = new ArrayList<>();
     static Document document;
 
-    static void tester() throws FileNotFoundException {
+    static void tester(Scanner scan) throws FileNotFoundException {
         File config = new File("config.txt");
-        Scanner scanner = new Scanner(config);
-        file = new File("./example javadocs/" + scanner.nextLine());
-
+        scan = new Scanner(config);
+        file = new File("./example javadocs/" + scan.nextLine());
     }
 
-    static boolean setup() {
-        Scanner scanner = new Scanner(System.in);
+    static boolean setup(Scanner scan) {
+        scan = new Scanner(System.in);
         System.out.println("Please enter filename: ");
-        String fileName = scanner.nextLine();
+        String fileName = scan.nextLine();
         if (fileName.length() > 4
                 && fileName.substring(fileName.length() - 5).equals(".html")) {
             file = new File(fileName);
+
             return true;
         }
-
 
         return false;
 
     }
 
-    static void setup2() throws FileNotFoundException {
-        Scanner scanner = new Scanner(file);
-        while (scanner.hasNextLine()) {
-            fileString += scanner.nextLine();
+    static void setup2(Scanner scan) throws FileNotFoundException {
+        scan = new Scanner(file);
+        while (scan.hasNextLine()) {
+            fileString += scan.nextLine();
         }
         document = Jsoup.parse(fileString);
+
     }
 
 
@@ -332,21 +337,32 @@ public class mainFile {
     }
 
     public static void main(String[] args) {
-
+        Scanner scan = new Scanner(System.in);
         try {
             if (test) {
-                tester();
-            } else if (!setup()) {
-                System.out.println("Invalid filename");
+                tester(scan);
+            } else if (!setup(scan)) {
+                System.out.println("Invalid filename\nPress enter to end");
+                scan = new Scanner(System.in);
+                scan.nextLine();
+                scan.close();
                 return;
             }
-            setup2();
+            setup2(scan);
             convertToClass();
-            archiveText(constructorList.toString(), "test.txt", false);
             createJavaFile();
+
+            scan = new Scanner(System.in);
+            System.out.println("COMPLETED: Javadoc has been created\nPress enter to end");
+            scan.nextLine();
+            scan.close();
 
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("\nPress enter to end");
+            scan=new Scanner(System.in);
+            scan.nextLine();
+            scan.close();
             return;
         }
 
