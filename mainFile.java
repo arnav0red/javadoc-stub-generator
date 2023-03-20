@@ -3,11 +3,13 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 
 
@@ -27,7 +29,7 @@ public class mainFile {
     static void tester(Scanner scan) throws FileNotFoundException {
         File config = new File("config.txt");
         scan = new Scanner(config);
-        file = new File("./example javadocs/" + scan.nextLine());
+        file = new File("./test/" + scan.nextLine());
     }
 
     static boolean setup(Scanner scan) {
@@ -77,6 +79,21 @@ public class mainFile {
         {
             String desc;
             String type = "";
+
+            List<Node> nodes = document.selectXpath(
+                    "//section[@class='class-description']/*/span[@class='extends-implements']")
+                    .get(0).childNodes();
+            String workingString = "";
+            for (int i = 0; i < nodes.size(); i++) {
+                if (nodes.get(i).toString().trim().equals("extends")
+                        || nodes.get(i).toString().trim().equals("implements")) {
+                    workingString += nodes.get(i).toString().trim() + " ";
+                } else {
+                    workingString += (nodes.get(i).childNodes().get(0)) + " ";
+                }
+            }
+            String param = workingString;
+
             try {
                 desc = document.selectXpath(
                         "//section[@class='class-description']/div[@class='block']")
@@ -89,7 +106,7 @@ public class mainFile {
                     document.selectXpath(
                             "//div[@class='type-signature']/span[@class='modifiers']")
                             .text(),
-                    type, document.title(), "", desc);
+                    type, document.title(), param, desc);
         }
         //fields
         {
@@ -296,7 +313,11 @@ public class mainFile {
                 new FileOutputStream("./created_javadoc/" + className.varName + ".java");
         PrintWriter outputScanner = new PrintWriter(outputStream);
         outputScanner.write("/**" + className.description + "*/");
-        outputScanner.write(className.modifier + " " + className.varName + "{\n");
+        outputScanner.write(className.modifier + " " + className.varName + " ");
+        if (!className.param.split(" ")[1].equals("Object")) {
+            outputScanner.write(className.param);
+        }
+        outputScanner.write("{\n");
         for (int i = 0; i < fieldList.size(); i++) {
             outputScanner.write("/**" + fieldList.get(i).description + "\n");
             for (int j = 0; j < fieldList.get(i).tagType.size(); j++) {
@@ -360,7 +381,7 @@ public class mainFile {
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("\nPress enter to end");
-            scan=new Scanner(System.in);
+            scan = new Scanner(System.in);
             scan.nextLine();
             scan.close();
             return;

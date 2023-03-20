@@ -25,7 +25,7 @@ public class varClass {
     public String varName;
 
     /**
-     * all the parameters given (only applicable to methods and constructors)
+     * all the parameters given / extends for classes
      */
     public String param;
 
@@ -52,7 +52,8 @@ public class varClass {
      * @param modifier    visibility (Eg: public static)
      * @param type        type of variable (Eg: int)
      * @param varName     name of variable (Eg: numObjects)
-     * @param param       assigned parameters (Eg: (int a, int b))
+     * @param param       assigned parameters/ extends class (Eg: (int a, int b), extends
+     *                    Objects)
      * @param description attached javadoc description
      * @param tags        attached tags (Eg: '@param)
      */
