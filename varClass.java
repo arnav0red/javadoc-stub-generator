@@ -3,22 +3,28 @@ import java.util.Arrays;
 
 public class varClass {
     //class or field or constructor or method
-    String keyword;
+    public String keyword;
 
-    //visibility and type
-    String modifier;
+    //visibility 
+    public String modifier;
+
+    //type
+    public String type;
 
     //name of variable
-    String varName;
+    public String varName;
+
+    //all the parameters given
+    public String param;
 
     //description
-    String description;
+    public String description;
 
     //stores a list of all the available types
-    ArrayList<String> tagType = new ArrayList<>();
+    public ArrayList<String> tagType = new ArrayList<>();
 
     //stores a list of the description of all avaliable types
-    ArrayList<String> tagDescription = new ArrayList<>();
+    public ArrayList<String> tagDescription = new ArrayList<>();
 
 
     /**
@@ -30,11 +36,13 @@ public class varClass {
      * @param description
      * @param tags
      */
-    varClass(String keyword, String modifier, String varName, String description,
-            String[]... tags) {
+    varClass(String keyword, String modifier, String type, String varName, String param,
+            String description, String[]... tags) {
         this.keyword = keyword;
         this.modifier = modifier;
+        this.type = type;
         this.varName = varName;
+        this.param=param;
         this.description = description;
         if (tags != null) {
             for (int i = 0; i < tags.length; i++) {
@@ -56,7 +64,7 @@ public class varClass {
                         tagType.add("return");
                         tagDescription.add(tags[i][1]);
                         continue;
-                    case "see":
+                    case "See Also:":
                         tagType.add("see");
                         tagDescription.add(tags[i][1]);
                         continue;
@@ -101,7 +109,11 @@ public class varClass {
         String toReturn = "";
         toReturn += "Keyword: " + keyword + "\n";
         toReturn += "Modifier: " + modifier + "\n";
+        toReturn += "Type: " + type + "\n";
+
         toReturn += "VarName: " + varName + "\n";
+        toReturn += "Param: " + param + "\n";
+        
         toReturn += "Description: " + description + "\n";
         for (int i = 0; i < tagType.size(); i++) {
             toReturn += "Tag: @" + tagType.get(i) + " " + tagDescription.get(i);
