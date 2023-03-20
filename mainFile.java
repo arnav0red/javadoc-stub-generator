@@ -7,7 +7,6 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import java.io.OutputStream;
 
 public class mainFile {
     static File file;
@@ -76,7 +75,7 @@ public class mainFile {
                             "//section[@class='class-description']/div[@class='block']")
                     .text();
 
-        } catch (Exception e) {
+        } catch (IndexOutOfBoundsException e) {
             desc = "";
         }
         className = new varClass("class",
@@ -84,86 +83,145 @@ public class mainFile {
                         "//div[@class='type-signature']/span[@class='modifiers']").text(),
                 document.title(), desc);
 
+        {
+            Elements fieldElements = document.selectXpath(
+                    "//section[@class='field-details']/*/*/section[@class='detail']");
+            for (int i = 0; i < fieldElements.size(); i++) {
+                String description;
+                try {
+                    description = document.selectXpath(
+                            "//section[@class='field-details']/*/*/*/div[@class='block']")
+                            .get(i).text();
 
-        Elements fieldElements = document.selectXpath(
-                "//section[@class='field-details']/*/*/section[@class='detail']");
-        for (int i = 0; i < fieldElements.size(); i++) {
-            String description;
-            try {
-                description = document.selectXpath(
-                        "//section[@class='field-details']/*/*/*/div[@class='block']")
-                        .get(i).text();
-
-            } catch (Exception e) {
-                description = "";
-            }
-            fieldList.add(new varClass("field", document.selectXpath(
-                    "//section[@class='field-details']/*/*/*/*/span[@class='modifiers']")
-                    .get(i).text(),
-                    document.selectXpath(
-                            "//section[@class='field-details']/*/*/*/*/span[@class='element-name']")
-                            .get(i).text(),
-                    description
-
-            ));
-
-        }
-
-        //constructors
-        Elements constructorElements = document.selectXpath(
-                "//section[@class='constructor-details']/*/*/section[@class='detail']");
-        for (int i = 0; i < constructorElements.size(); i++) {
-            String description;
-            try {
-                description = document.selectXpath(
-                        "//section[@class='constructor-details']/*/*/*/div[@class='block']")
-                        .get(i).text();
-
-            } catch (Exception e) {
-                description = "";
-            }
-            constructorList.add(new varClass("constructor", document.selectXpath(
-                    "//section[@class='constructor-details']/*/*/*/*/span[@class='modifiers']")
-                    .get(i).text(),
-                    document.selectXpath(
-                            "//section[@class='constructor-details']/*/*/*/*/span[@class='element-name']")
-                            .get(i).text(),
-                    description));
-        }
-
-        //methods
-        Elements methodElements = document.selectXpath(
-                "//section[@class='method-details']/*/*/section[@class='detail']");
-        ArrayList<String[]> tempTagList = new ArrayList<>();
-        for (int i = 0; i < methodElements.size(); i++) {
-            String description;
-            try {
-                description = document.selectXpath(
-                        "//section[@class='method-details']/*/*/*/div[@class='block']")
-                        .get(i).text();
-
-            } catch (Exception e) {
-                description = "";
-            }
-            for (Element j : methodElements.get(i).getElementsByClass("notes")) {
-                //tempTagList.add(j.text());
-                for (int k = 0; k < j.parent().getElementsByTag("dd").size(); k++) {
-                    System.out.println(document.selectXpath(
-                            "//section[@class='method-details']/*/*/*/*/span[@class='element-name']")
-                            .get(i).text() + " "
-                            + j.parent().getElementsByTag("dd").get(k).text());
+                } catch (IndexOutOfBoundsException e) {
+                    description = "";
                 }
+                fieldList.add(new varClass("field", document.selectXpath(
+                        "//section[@class='field-details']/*/*/*/*/span[@class='modifiers']")
+                        .get(i).text(),
+                        document.selectXpath(
+                                "//section[@class='field-details']/*/*/*/*/span[@class='element-name']")
+                                .get(i).text(),
+                        description
+
+                ));
+
             }
-            methodList.add(new varClass("method", document.selectXpath(
-                    "//section[@class='method-details']/*/*/*/*/span[@class='modifiers']")
-                    .get(i).text(),
-                    document.selectXpath(
-                            "//section[@class='method-details']/*/*/*/*/span[@class='element-name']")
-                            .get(i).text(),
-                    description));
         }
+        {
+            //constructors
+            Elements constructorElements = document.selectXpath(
+                    "//section[@class='constructor-details']/*/*/section[@class='detail']");
+            for (int i = 0; i < constructorElements.size(); i++) {
+                String description;
+                ArrayList<String[]> tempTagList = new ArrayList<>();
+                String[][] convertToString = null;
+                String constructorVarName = document.selectXpath(
+                        "//section[@class='method-details']/*/*/*/*/span[@class='element-name']")
+                        .get(i).text();
+
+                try {
+                    description = document.selectXpath(
+                            "//section[@class='constructor-details']/*/*/*/div[@class='block']")
+                            .get(i).text();
+
+                } catch (IndexOutOfBoundsException e) {
+                    description = "";
+                }
+                try {
+                    String paraType = "";
+                    for (Element j : constructorElements.get(i)
+                            .getElementsByClass("notes").get(0).children()) {
+                        //tempTagList.add(j.text());
+                        //System.out.println("SIZE "+j.childrenSize());
+
+                        if (j.tagName().equals("dt")) {
+                            paraType = j.text();
+
+                            continue;
+                        }
+                        if (j.tagName().equals("dd")) {
+                            tempTagList.add(new String[] {paraType, j.text() + "\n"});
+
+                        }
+
+                    }
 
 
+
+                } catch (IndexOutOfBoundsException e) {
+                    tempTagList = null;
+                }
+                if (tempTagList != null) {
+                    convertToString = new String[tempTagList.size()][2];
+                    for (int x = 0; x < tempTagList.size(); x++) {
+                        convertToString[x][0] = tempTagList.get(x)[0];
+                        convertToString[x][1] = tempTagList.get(x)[1];
+
+                    }
+                }
+                constructorList.add(new varClass("constructor", document.selectXpath(
+                        "//section[@class='constructor-details']/*/*/*/*/span[@class='modifiers']")
+                        .get(i).text(), constructorVarName, description,
+                        convertToString));
+            }
+        }
+        {
+            //methods
+            Elements methodElements = document.selectXpath(
+                    "//section[@class='method-details']/*/*/section[@class='detail']");
+
+            for (int i = 0; i < methodElements.size(); i++) {
+                ArrayList<String[]> tempTagList = new ArrayList<>();
+                String description;
+                String[][] convertToString = null;
+                String methodVarName = document.selectXpath(
+                        "//section[@class='method-details']/*/*/*/*/span[@class='element-name']")
+                        .get(i).text();
+                try {
+                    description = document.selectXpath(
+                            "//section[@class='method-details']/*/*/*/div[@class='block']")
+                            .get(i).text();
+
+                } catch (IndexOutOfBoundsException e) {
+                    description = "";
+                }
+                try {
+                    String paraType = "";
+                    for (Element j : methodElements.get(i).getElementsByClass("notes")
+                            .get(0).children()) {
+
+                        if (j.tagName().equals("dt")) {
+                            paraType = j.text();
+
+                            continue;
+                        }
+                        if (j.tagName().equals("dd")) {
+                            tempTagList.add(new String[] {paraType, j.text() + "\n"});
+
+                        }
+
+                    }
+
+
+
+                } catch (IndexOutOfBoundsException e) {
+                    tempTagList = null;
+                }
+                if (tempTagList != null) {
+                    convertToString = new String[tempTagList.size()][2];
+                    for (int x = 0; x < tempTagList.size(); x++) {
+                        convertToString[x][0] = tempTagList.get(x)[0];
+                        convertToString[x][1] = tempTagList.get(x)[1];
+
+                    }
+                }
+                methodList.add(new varClass("method", document.selectXpath(
+                        "//section[@class='method-details']/*/*/*/*/span[@class='modifiers']")
+                        .get(i).text(), methodVarName, description, convertToString));
+            }
+
+        }
     }
 
     static void createJavaFile() {
@@ -181,8 +239,9 @@ public class mainFile {
             }
             setup2();
             convertToClass();
-            archiveText(methodList.toString(), "test.txt", false);
-            //System.out.println(fieldList.toString());
+
+            archiveText(constructorList.toString(), "test.txt", false);
+
 
         } catch (Exception e) {
             e.printStackTrace();

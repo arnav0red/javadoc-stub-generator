@@ -48,7 +48,7 @@ public class varClass {
                         tagType.add("exception");
                         tagDescription.add(tags[i][1]);
                         continue;
-                    case "param":
+                    case "Parameters:":
                         tagType.add("param");
                         tagDescription.add(tags[i][1]);
                         continue;
