@@ -42,7 +42,7 @@ public class varClass {
         this.modifier = modifier;
         this.type = type;
         this.varName = varName;
-        this.param=param;
+        this.param = param;
         this.description = description;
         if (tags != null) {
             for (int i = 0; i < tags.length; i++) {
@@ -113,7 +113,7 @@ public class varClass {
 
         toReturn += "VarName: " + varName + "\n";
         toReturn += "Param: " + param + "\n";
-        
+
         toReturn += "Description: " + description + "\n";
         for (int i = 0; i < tagType.size(); i++) {
             toReturn += "Tag: @" + tagType.get(i) + " " + tagDescription.get(i);
