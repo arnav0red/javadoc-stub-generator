@@ -19,7 +19,7 @@ import org.jsoup.select.Elements;
 public class mainFile {
     static File file;
     static String fileString = "";
-    static boolean test = false;
+    static boolean test = true;
     static varClass className;
     static ArrayList<varClass> fieldList = new ArrayList<>();
     static ArrayList<varClass> constructorList = new ArrayList<>();
@@ -312,29 +312,29 @@ public class mainFile {
         FileOutputStream outputStream =
                 new FileOutputStream("./created_javadoc/" + className.varName + ".java");
         PrintWriter outputScanner = new PrintWriter(outputStream);
-        outputScanner.write("/**" + className.description + "*/");
+        outputScanner.write("/**\n" + className.description + "*/\n");
         outputScanner.write(className.modifier + " " + className.varName + " ");
         if (!className.param.split(" ")[1].equals("Object")) {
             outputScanner.write(className.param);
         }
         outputScanner.write("{\n");
         for (int i = 0; i < fieldList.size(); i++) {
-            outputScanner.write("/**" + fieldList.get(i).description + "\n");
+            outputScanner.write("/**\n" + fieldList.get(i).description + "\n");
             for (int j = 0; j < fieldList.get(i).tagType.size(); j++) {
                 outputScanner.write("@" + fieldList.get(i).tagType.get(j) + " "
                         + fieldList.get(i).tagDescription.get(j));
             }
-            outputScanner.write("*/");
+            outputScanner.write("*/\n");
             outputScanner.write(fieldList.get(i).modifier + " " + fieldList.get(i).type
                     + " " + fieldList.get(i).varName + ";\n");
         }
         for (int i = 0; i < constructorList.size(); i++) {
-            outputScanner.write("/**" + constructorList.get(i).description + "\n");
+            outputScanner.write("/**\n" + constructorList.get(i).description + "\n");
             for (int j = 0; j < constructorList.get(i).tagType.size(); j++) {
                 outputScanner.write("@" + constructorList.get(i).tagType.get(j) + " "
                         + constructorList.get(i).tagDescription.get(j));
             }
-            outputScanner.write("*/");
+            outputScanner.write("*/\n");
             outputScanner.write(constructorList.get(i).modifier + " "
                     + constructorList.get(i).type + " " + constructorList.get(i).varName
                     + constructorList.get(i).param + "{}\n");
@@ -343,7 +343,7 @@ public class mainFile {
 
         for (int i = 0; i < methodList.size(); i++) {
             boolean doesOverride = false;
-            outputScanner.write("/**" + methodList.get(i).description + "\n");
+            outputScanner.write("/**\n" + methodList.get(i).description + "\n");
             for (int j = 0; j < methodList.get(i).tagType.size(); j++) {
                 if (methodList.get(i).tagType.get(j).equals("override")) {
                     doesOverride = true;
@@ -351,7 +351,7 @@ public class mainFile {
                 outputScanner.write("@" + methodList.get(i).tagType.get(j) + " "
                         + methodList.get(i).tagDescription.get(j));
             }
-            outputScanner.write("*/");
+            outputScanner.write("*/\n");
             if (doesOverride) {
                 outputScanner.write("\n@Override\n");
             }
