@@ -1,0 +1,1 @@
+memberSearchIndex = [{"p":"<Unnamed>","c":"trial","l":"method1(int, int)","u":"method1(int,int)"},{"p":"<Unnamed>","c":"trial","l":"toString()"},{"p":"<Unnamed>","c":"trial","l":"trial()","u":"%3Cinit%3E()"},{"p":"<Unnamed>","c":"trial","l":"var1"},{"p":"<Unnamed>","c":"trial","l":"var2"}];updateSearchResults();
