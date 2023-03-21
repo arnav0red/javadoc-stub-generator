@@ -69,14 +69,6 @@ public class varClass {
             for (int i = 0; i < tags.length; i++) {
                 switch (tags[i][0]) {
 
-                    case "author":
-                        tagType.add("author");
-                        tagDescription.add(tags[i][1]);
-                        continue;
-                    case "exception":
-                        tagType.add("exception");
-                        tagDescription.add(tags[i][1]);
-                        continue;
                     case "Parameters:":
                         tagType.add("param");
                         tagDescription.add(tags[i][1]);
@@ -89,28 +81,12 @@ public class varClass {
                         tagType.add("see");
                         tagDescription.add(tags[i][1]);
                         continue;
-                    case "serial":
-                        tagType.add("serial");
-                        tagDescription.add(tags[i][1]);
-                        continue;
-                    case "serialData":
-                        tagType.add("serialData");
-                        tagDescription.add(tags[i][1]);
-                        continue;
-                    case "serialField":
-                        tagType.add("serialField");
-                        tagDescription.add(tags[i][1]);
-                        continue;
-                    case "since":
+                    case "Since:":
                         tagType.add("since");
                         tagDescription.add(tags[i][1]);
                         continue;
                     case "Throws:":
                         tagType.add("throws");
-                        tagDescription.add(tags[i][1]);
-                        continue;
-                    case "version":
-                        tagType.add("version");
                         tagDescription.add(tags[i][1]);
                         continue;
                     case "Overrides:":
