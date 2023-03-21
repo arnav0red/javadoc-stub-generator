@@ -3,7 +3,9 @@ Creates a java file with stubs from a given javadoc page
 
 ## How to use
 1. Save the javadoc you want to convert as a .html file
-2. Compile and run mainFile.java (or just run run.bat)
+2. Mac/Linux: run the run.sh file <br>
+   Windows: run the run.bat file <br>
+   (Incase of error manually compile and run mainFile.java)
 3. Give the filename
 4. Converted .java file is created in ./created_javadoc
 
