@@ -14,24 +14,60 @@ import org.jsoup.select.Elements;
 
 
 /**
- * This class defines the steps
+ * This class defines the conversion of a java file to a javadoc
  */
 public class mainFile {
+    /**
+     * Defines the file to be read
+     */
     static File file;
-    static String fileString = "";
-    static boolean test = false;
+
+    /**
+     * Stores class names data
+     */
     static varClass className;
+    /**
+     * Stores fields data
+     */
     static ArrayList<varClass> fieldList = new ArrayList<>();
+    /**
+     * Stores constructors data
+     */
     static ArrayList<varClass> constructorList = new ArrayList<>();
+    /**
+     * Stores methods data
+     */
     static ArrayList<varClass> methodList = new ArrayList<>();
+    /**
+     * fileString is converted to a Jsoup element
+     */
     static Document document;
 
-    static void tester(Scanner scan) throws FileNotFoundException {
-        File config = new File("config.txt");
-        scan = new Scanner(config);
-        file = new File("./test/" + scan.nextLine());
+    /**
+     * Used to test certain files repeteadly
+     * 
+     * @param scan Scanner instance used to check filename
+     * @throws FileNotFoundException throws exception if config.txt doesn't exist
+     */
+    static boolean tester(Scanner scan) {
+        try {
+            File config = new File("config.txt");
+            scan = new Scanner(config);
+            if (scan.nextLine().equals("true")) {
+                file = new File("./test/" + scan.nextLine().trim());
+                return true;
+            }
+        } catch (FileNotFoundException e) {
+        }
+        return false;
     }
 
+    /**
+     * Takes in user input of file name
+     * 
+     * @param scan Scanner instance used to check filename
+     * @return true, if the method executes
+     */
     static boolean setup(Scanner scan) {
         scan = new Scanner(System.in);
         System.out.println("Please enter filename: ");
@@ -47,8 +83,15 @@ public class mainFile {
 
     }
 
+    /**
+     * converts given file to Jsoup element
+     * 
+     * @param scan Scanner instance used to parse through file
+     * @throws FileNotFoundException throws exception if given file doesn't exist
+     */
     static void setup2(Scanner scan) throws FileNotFoundException {
         scan = new Scanner(file);
+        String fileString = "";
         while (scan.hasNextLine()) {
             fileString += scan.nextLine();
         }
@@ -56,7 +99,13 @@ public class mainFile {
 
     }
 
-
+    /**
+     * Used to write a given string to a file
+     * 
+     * @param stringVar
+     * @param file
+     * @param append
+     */
     static void archiveText(String stringVar, String file, boolean append) {
         try {
 
@@ -79,19 +128,33 @@ public class mainFile {
         {
             String desc;
             String type = "";
+            boolean containsImplements = false;
 
             List<Node> nodes = document.selectXpath(
                     "//section[@class='class-description']/*/span[@class='extends-implements']")
                     .get(0).childNodes();
             String workingString = "";
+
             for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i).toString().trim().equals("extends")
-                        || nodes.get(i).toString().trim().equals("implements")) {
-                    workingString += nodes.get(i).toString().trim() + " ";
-                } else {
-                    workingString += (nodes.get(i).childNodes().get(0)) + " ";
+                if (nodes.get(i).toString().trim().equals("implements")) {
+                    containsImplements = true;
                 }
             }
+            if (containsImplements) {
+                for (int i = 0; i < nodes.size(); i++) {
+
+                    if (nodes.get(i).toString().trim().equals("extends")
+                            || nodes.get(i).toString().trim().equals("implements")) {
+                        workingString += nodes.get(i).toString().trim() + " ";
+                    } else {
+                        try {
+                            workingString += (nodes.get(i).childNodes().get(0)) + " ";
+                        } catch (IndexOutOfBoundsException e) {
+                        }
+                    }
+                }
+            }
+            workingString=nodes.get(0).toString();
             String param = workingString;
 
             try {
@@ -367,8 +430,9 @@ public class mainFile {
     public static void main(String[] args) {
         Scanner scan = new Scanner(System.in);
         try {
-            if (test) {
-                tester(scan);
+
+            if (tester(scan)) {
+                System.out.println("Testing");
             } else if (!setup(scan)) {
                 System.out.println("Invalid filename\nPress enter to end");
                 scan = new Scanner(System.in);
