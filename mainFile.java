@@ -19,7 +19,7 @@ import org.jsoup.select.Elements;
 public class mainFile {
     static File file;
     static String fileString = "";
-    static boolean test = true;
+    static boolean test = false;
     static varClass className;
     static ArrayList<varClass> fieldList = new ArrayList<>();
     static ArrayList<varClass> constructorList = new ArrayList<>();
