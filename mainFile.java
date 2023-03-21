@@ -342,12 +342,19 @@ public class mainFile {
         }
 
         for (int i = 0; i < methodList.size(); i++) {
+            boolean doesOverride = false;
             outputScanner.write("/**" + methodList.get(i).description + "\n");
             for (int j = 0; j < methodList.get(i).tagType.size(); j++) {
+                if (methodList.get(i).tagType.get(j).equals("override")) {
+                    doesOverride = true;
+                }
                 outputScanner.write("@" + methodList.get(i).tagType.get(j) + " "
                         + methodList.get(i).tagDescription.get(j));
             }
             outputScanner.write("*/");
+            if (doesOverride) {
+                outputScanner.write("\n@Override\n");
+            }
             outputScanner.write(methodList.get(i).modifier + " " + methodList.get(i).type
                     + " " + methodList.get(i).varName + methodList.get(i).param + "{}\n");
         }
