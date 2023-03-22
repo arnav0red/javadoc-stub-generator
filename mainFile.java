@@ -70,11 +70,12 @@ public class mainFile {
      */
     static boolean setup(Scanner scan) {
         scan = new Scanner(System.in);
-        System.out.println("Please enter filename: ");
+        new File("./input_javadoc").mkdir();
+        System.out.println("Please enter filename located in input_javadoc folder: ");
         String fileName = scan.nextLine();
         if (fileName.length() > 4
                 && fileName.substring(fileName.length() - 5).equals(".html")) {
-            file = new File(fileName);
+            file = new File("./input_javadoc/"+fileName);
 
             return true;
         }
@@ -154,7 +155,9 @@ public class mainFile {
                     }
                 }
             }
+            else{
             workingString=nodes.get(0).toString();
+            }
             String param = workingString;
 
             try {
