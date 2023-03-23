@@ -130,30 +130,13 @@ public class mainFile {
             String desc;
             String type = "";
 
-            List<Node> nodes = document.selectXpath(
+            String param = (document.selectXpath(
                     "//section[@class='class-description']/*/span[@class='extends-implements']")
-                    .get(0).childNodes();
-            String workingString = "";
-
-
-            if (nodes.size() > 1) {
-
-                for (int i = 0; i < nodes.size(); i++) {
-
-                    if (nodes.get(i).toString().trim().equals("extends")
-                            || nodes.get(i).toString().trim().equals("implements")) {
-                        workingString += nodes.get(i).toString().trim() + " ";
-                    } else {
-                        try {
-                            workingString += (nodes.get(i).childNodes().get(0)) + " ";
-                        } catch (IndexOutOfBoundsException e) {
-                        }
-                    }
-                }
-            } else {
-                workingString = nodes.get(0).toString();
+                    .get(0).text());
+            if (param.contains("implements")) {
+                param = param.substring(0, param.indexOf("implements")) + " "
+                        + param.substring(param.indexOf("implements"), param.length());
             }
-            String param = workingString;
 
             try {
                 desc = document.selectXpath(
@@ -171,23 +154,21 @@ public class mainFile {
         }
         //fields
         {
-            Elements fieldElements = document.selectXpath(
+            Elements elements = document.selectXpath(
                     "//section[@class='field-details']/*/*/section[@class='detail']");
-            for (int i = 0; i < fieldElements.size(); i++) {
+            for (int i = 0; i < elements.size(); i++) {
                 String description;
                 ArrayList<String[]> tempTagList = new ArrayList<>();
                 String[][] convertToString = null;
-                String fieldVarName = document.selectXpath(
-                        "//section[@class='field-details']/*/*/*/*/span[@class='element-name']")
-                        .get(i).text();
-                String type = document.selectXpath(
-                        "//section[@class='field-details']/*/*/*/*/span[@class='return-type']")
-                        .get(i).text();
+                String varName = elements.get(i).children().get(0).text();
+                String type = elements.get(i).children().get(1)
+                        .getElementsByClass("return-type").text();
+                String modifiers = elements.get(i).children().get(1)
+                        .getElementsByClass("modifiers").text();
 
                 try {
-                    description = document.selectXpath(
-                            "//section[@class='field-details']/*/*/*/div[@class='block']")
-                            .get(i).text();
+                    description = elements.get(i).children().get(2)
+                            .getElementsByClass("block").text();
 
                 } catch (IndexOutOfBoundsException e) {
                     description = "";
@@ -195,8 +176,8 @@ public class mainFile {
 
                 try {
                     String paraType = "";
-                    for (Element j : fieldElements.get(i).getElementsByClass("notes")
-                            .get(0).children()) {
+                    for (Element j : elements.get(i).getElementsByClass("notes").get(0)
+                            .children()) {
 
                         if (j.tagName().equals("dt")) {
                             paraType = j.text();
@@ -223,10 +204,8 @@ public class mainFile {
 
                     }
                 }
-                fieldList.add(new varClass("field", document.selectXpath(
-                        "//section[@class='field-details']/*/*/*/*/span[@class='modifiers']")
-                        .get(i).text(), type, fieldVarName, "", description,
-                        convertToString
+                fieldList.add(new varClass("field", modifiers, type, varName, "",
+                        description, convertToString
 
                 ));
 
@@ -234,38 +213,41 @@ public class mainFile {
         }
         {
             //constructors
-            Elements constructorElements = document.selectXpath(
+            Elements elements = document.selectXpath(
                     "//section[@class='constructor-details']/*/*/section[@class='detail']");
-            for (int i = 0; i < constructorElements.size(); i++) {
-                String description;
+            for (int i = 0; i < elements.size(); i++) {
+                String description = "";
                 ArrayList<String[]> tempTagList = new ArrayList<>();
                 String[][] convertToString = null;
-                String constructorVarName = document.selectXpath(
-                        "//section[@class='constructor-details']/*/*/*/*/span[@class='element-name']")
-                        .get(i).text();
+                String varName = elements.get(i).children().get(0).text();
                 String param;
+                String modifiers = elements.get(i).children().get(1)
+                        .getElementsByClass("modifiers").text();
+
+
                 try {
-                    param = document.selectXpath(
-                            "//section[@class='constructor-details']/*/*/*/*/span[@class='parameters']")
-                            .get(i).text();
+                    param = elements.get(i).children().get(1)
+                            .getElementsByClass("parameters").text();
                 } catch (IndexOutOfBoundsException e) {
+                    param = "()";
+                }
+                if (param.trim().isEmpty()) {
                     param = "()";
                 }
                 String type = "";
 
 
                 try {
-                    description = document.selectXpath(
-                            "//section[@class='constructor-details']/*/*/*/div[@class='block']")
-                            .get(i).text();
+                    description = elements.get(i).children().get(2)
+                            .getElementsByClass("block").text();
 
                 } catch (IndexOutOfBoundsException e) {
                     description = "";
                 }
                 try {
                     String paraType = "";
-                    for (Element j : constructorElements.get(i)
-                            .getElementsByClass("notes").get(0).children()) {
+                    for (Element j : elements.get(i).getElementsByClass("notes").get(0)
+                            .children()) {
 
                         if (j.tagName().equals("dt")) {
                             paraType = j.text();
@@ -292,47 +274,46 @@ public class mainFile {
 
                     }
                 }
-                constructorList.add(new varClass("constructor", document.selectXpath(
-                        "//section[@class='constructor-details']/*/*/*/*/span[@class='modifiers']")
-                        .get(i).text(), type, constructorVarName, param, description,
-                        convertToString));
+                constructorList.add(new varClass("constructor", modifiers, type, varName,
+                        param, description, convertToString));
             }
         }
         {
             //methods
-            Elements methodElements = document.selectXpath(
+            Elements elements = document.selectXpath(
                     "//section[@class='method-details']/*/*/section[@class='detail']");
 
-            for (int i = 0; i < methodElements.size(); i++) {
+            for (int i = 0; i < elements.size(); i++) {
                 ArrayList<String[]> tempTagList = new ArrayList<>();
-                String description;
+                String description = "";
                 String[][] convertToString = null;
-                String methodVarName = document.selectXpath(
-                        "//section[@class='method-details']/*/*/*/*/span[@class='element-name']")
-                        .get(i).text();
-                String type = document.selectXpath(
-                        "//section[@class='method-details']/*/*/*/*/span[@class='return-type']")
-                        .get(i).text();
+                String varName = elements.get(i).children().get(0).text();
+                String type = elements.get(i).children().get(1)
+                        .getElementsByClass("return-type").text();
                 String param;
+                String modifiers = elements.get(i).children().get(1)
+                        .getElementsByClass("modifiers").text();
                 try {
-                    param = document.selectXpath(
-                            "//section[@class='method-details']/*/*/*/*/span[@class='parameters']")
-                            .get(i).text();
+                    param = elements.get(i).children().get(1)
+                            .getElementsByClass("parameters").text();
                 } catch (IndexOutOfBoundsException e) {
                     param = "()";
                 }
+                if (param.trim().isEmpty()) {
+                    param = "()";
+                }
+
                 try {
-                    description = document.selectXpath(
-                            "//section[@class='method-details']/*/*/*/div[@class='block']")
-                            .get(i).text();
+                    description = elements.get(i).children().get(2)
+                            .getElementsByClass("block").text();
 
                 } catch (IndexOutOfBoundsException e) {
                     description = "";
                 }
                 try {
                     String paraType = "";
-                    for (Element j : methodElements.get(i).getElementsByClass("notes")
-                            .get(0).children()) {
+                    for (Element j : elements.get(i).getElementsByClass("notes").get(0)
+                            .children()) {
 
                         if (j.tagName().equals("dt")) {
                             paraType = j.text();
@@ -359,10 +340,8 @@ public class mainFile {
 
                     }
                 }
-                methodList.add(new varClass("method", document.selectXpath(
-                        "//section[@class='method-details']/*/*/*/*/span[@class='modifiers']")
-                        .get(i).text(), type, methodVarName, param, description,
-                        convertToString));
+                methodList.add(new varClass("method", modifiers, type, varName, param,
+                        description, convertToString));
             }
 
         }
@@ -414,7 +393,7 @@ public class mainFile {
             }
             outputScanner.write("*/\n");
             if (doesOverride) {
-                outputScanner.write("\n@Override\n");
+                outputScanner.write("@Override\n");
             }
             outputScanner.write(methodList.get(i).modifier + " " + methodList.get(i).type
                     + " " + methodList.get(i).varName + methodList.get(i).param + "{}\n");
