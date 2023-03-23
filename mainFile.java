@@ -75,7 +75,7 @@ public class mainFile {
         String fileName = scan.nextLine();
         if (fileName.length() > 4
                 && fileName.substring(fileName.length() - 5).equals(".html")) {
-            file = new File("./input_javadoc/"+fileName);
+            file = new File("./input_javadoc/" + fileName);
 
             return true;
         }
@@ -129,19 +129,15 @@ public class mainFile {
         {
             String desc;
             String type = "";
-            boolean containsImplements = false;
 
             List<Node> nodes = document.selectXpath(
                     "//section[@class='class-description']/*/span[@class='extends-implements']")
                     .get(0).childNodes();
             String workingString = "";
 
-            for (int i = 0; i < nodes.size(); i++) {
-                if (nodes.get(i).toString().trim().equals("implements")) {
-                    containsImplements = true;
-                }
-            }
-            if (containsImplements) {
+
+            if (nodes.size() > 1) {
+
                 for (int i = 0; i < nodes.size(); i++) {
 
                     if (nodes.get(i).toString().trim().equals("extends")
@@ -154,9 +150,8 @@ public class mainFile {
                         }
                     }
                 }
-            }
-            else{
-            workingString=nodes.get(0).toString();
+            } else {
+                workingString = nodes.get(0).toString();
             }
             String param = workingString;
 
