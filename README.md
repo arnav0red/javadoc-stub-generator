@@ -1,5 +1,5 @@
 # javadoc-stub-generator
-Creates a java file with stubs from a given javadoc page
+Creates a java file with stubs from a given javadoc page of UW Madison's course format
 
 ## How to use
 1. Save the javadoc you want to convert as a .html file
