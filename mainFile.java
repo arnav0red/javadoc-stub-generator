@@ -3,6 +3,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
@@ -22,26 +23,9 @@ public class mainFile {
      */
     static File file;
 
-    /**
-     * Stores class names data
-     */
-    static varClass className;
-    /**
-     * Stores fields data
-     */
-    static ArrayList<varClass> fieldList = new ArrayList<>();
-    /**
-     * Stores constructors data
-     */
-    static ArrayList<varClass> constructorList = new ArrayList<>();
-    /**
-     * Stores methods data
-     */
-    static ArrayList<varClass> methodList = new ArrayList<>();
-    /**
-     * fileString is converted to a Jsoup element
-     */
-    static Document document;
+    static boolean addDefValues = false;
+
+    static boolean selectAllFiles = false;
 
     /**
      * Used to test certain files repeteadly
@@ -54,7 +38,13 @@ public class mainFile {
             File config = new File("config.txt");
             scan = new Scanner(config);
             if (scan.nextLine().equals("true")) {
-                file = new File("./test/" + scan.nextLine().trim());
+                String fileName = scan.nextLine().trim();
+
+                file = new File("./test/" + fileName);
+                if (fileName.equals(".")) {
+                    selectAllFiles = true;
+                }
+                addDefValues = true;
                 return true;
             }
         } catch (FileNotFoundException e) {
@@ -71,11 +61,20 @@ public class mainFile {
     static boolean setup(Scanner scan) {
         scan = new Scanner(System.in);
         new File("./input_javadoc").mkdir();
-        System.out.println("Please enter filename located in input_javadoc folder: ");
+        System.out.println(
+                "Please enter filename located in input_javadoc folder\n(Enter . for all the files in input_javadoc folder): ");
         String fileName = scan.nextLine();
-        if (fileName.length() > 4
-                && fileName.substring(fileName.length() - 5).equals(".html")) {
+        if (fileName.trim().equals(".") || (fileName.length() > 4
+                && fileName.substring(fileName.length() - 5).equals(".html"))) {
             file = new File("./input_javadoc/" + fileName);
+
+            if (fileName.trim().equals(".")) {
+                selectAllFiles = true;
+            }
+            System.out.println("Add default return values?(y,n): ");
+            if (scan.nextLine().trim().toLowerCase().equals("y")) {
+                addDefValues = true;
+            }
 
             return true;
         }
@@ -90,13 +89,19 @@ public class mainFile {
      * @param scan Scanner instance used to parse through file
      * @throws FileNotFoundException throws exception if given file doesn't exist
      */
-    static void setup2(Scanner scan) throws FileNotFoundException {
-        scan = new Scanner(file);
+    static Document createJsoupDocument(Scanner scan, int iteration)
+            throws FileNotFoundException {
+        if (iteration == -1) {
+            scan = new Scanner(file);
+        } else {
+            scan = new Scanner(file.listFiles()[iteration]);
+
+        }
         String fileString = "";
         while (scan.hasNextLine()) {
             fileString += scan.nextLine();
         }
-        document = Jsoup.parse(fileString);
+        return Jsoup.parse(fileString);
 
     }
 
@@ -125,7 +130,16 @@ public class mainFile {
 
     }
 
-    static void convertToClass() {
+    static void convertToClass(Document document) throws FileNotFoundException {
+        varClass className;
+
+        ArrayList<varClass> fieldList = new ArrayList<>();
+
+        ArrayList<varClass> constructorList = new ArrayList<>();
+
+        ArrayList<varClass> methodList = new ArrayList<>();
+
+
         {
             String desc;
             String type = "";
@@ -152,7 +166,7 @@ public class mainFile {
                             .text(),
                     type, document.title(), param, desc);
         }
-        //fields
+        // fields
         {
             Elements elements = document.selectXpath(
                     "//section[@class='field-details']/*/*/section[@class='detail']");
@@ -212,7 +226,7 @@ public class mainFile {
             }
         }
         {
-            //constructors
+            // constructors
             Elements elements = document.selectXpath(
                     "//section[@class='constructor-details']/*/*/section[@class='detail']");
             for (int i = 0; i < elements.size(); i++) {
@@ -279,7 +293,7 @@ public class mainFile {
             }
         }
         {
-            //methods
+            // methods
             Elements elements = document.selectXpath(
                     "//section[@class='method-details']/*/*/section[@class='detail']");
 
@@ -345,9 +359,12 @@ public class mainFile {
             }
 
         }
+        createJavaFile(document, className, fieldList, constructorList, methodList);
     }
 
-    static void createJavaFile() throws FileNotFoundException {
+    static void createJavaFile(Document document, varClass className,
+            ArrayList<varClass> fieldList, ArrayList<varClass> constructorList,
+            ArrayList<varClass> methodList) throws FileNotFoundException {
         new File("./created_javadoc").mkdir();
         FileOutputStream outputStream =
                 new FileOutputStream("./created_javadoc/" + className.varName + ".java");
@@ -356,6 +373,9 @@ public class mainFile {
         outputScanner.write(className.modifier + " " + className.varName + " ");
         if (!className.param.split(" ")[1].equals("Object")) {
             outputScanner.write(className.param);
+        } else {
+            outputScanner.write(
+                    className.param.substring(className.param.indexOf("Object") + 6));
         }
         outputScanner.write("{\n");
         for (int i = 0; i < fieldList.size(); i++) {
@@ -396,7 +416,43 @@ public class mainFile {
                 outputScanner.write("@Override\n");
             }
             outputScanner.write(methodList.get(i).modifier + " " + methodList.get(i).type
-                    + " " + methodList.get(i).varName + methodList.get(i).param + "{}\n");
+                    + " " + methodList.get(i).varName + methodList.get(i).param + "{\n");
+            if (addDefValues && !methodList.get(i).type.equals("void")) {
+
+                String returnType = "";
+                switch (methodList.get(i).type) {
+
+                    case "boolean":
+                        returnType = "false";
+                        break;
+                    case "int":
+                        returnType = "-1";
+                        break;
+                    case "byte":
+                        returnType = "-1";
+                        break;
+                    case "short":
+                        returnType = "-1";
+                        break;
+                    case "long":
+                        returnType = "-1";
+                        break;
+                    case "float":
+                        returnType = "-1";
+                        break;
+                    case "double":
+                        returnType = "-1";
+                        break;
+                    case "char":
+                        returnType = "\'\'";
+                        break;
+                    default:
+                        returnType = "null";
+                        break;
+                }
+                outputScanner.write("return " + returnType + ";");
+            }
+            outputScanner.write("\n}\n");
         }
 
         outputScanner.write("}");
@@ -417,9 +473,18 @@ public class mainFile {
                 scan.close();
                 return;
             }
-            setup2(scan);
-            convertToClass();
-            createJavaFile();
+
+
+            if (!selectAllFiles) {
+                convertToClass(createJsoupDocument(scan, -1));
+            } else {
+                for (int i = 0; i < file.list().length; i++) {
+
+                    Document document = createJsoupDocument(scan, i);
+                    convertToClass(document);
+
+                }
+            }
 
             scan = new Scanner(System.in);
             System.out.println("COMPLETED: Javadoc has been created\nPress enter to end");
