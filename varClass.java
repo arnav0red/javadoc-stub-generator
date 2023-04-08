@@ -93,6 +93,10 @@ public class varClass {
                         tagType.add("override");
                         tagDescription.add(tags[i][1]);
                         continue;
+                    case "Specified by:":
+                        tagType.add("override");
+                        tagDescription.add(tags[i][1]);
+                        continue;
 
 
                 }
